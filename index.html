@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Learn & Play</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+
+  :root {
+    --bg: #f0f7ff;
+    --card: #ffffff;
+    --primary: #5b9bd5;
+    --primary-light: #d6eaff;
+    --green: #5cb85c;
+    --green-light: #d4edda;
+    --yellow: #f7c948;
+    --yellow-light: #fff8e1;
+    --red: #e05c5c;
+    --text: #2d3748;
+    --text-soft: #718096;
+    --radius: 24px;
+    --shadow: 0 4px 20px rgba(91,155,213,0.15);
+    --shadow-hover: 0 8px 30px rgba(91,155,213,0.3);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    touch-action: manipulation;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; padding: 20px; flex-direction: column; align-items: center; }
+  .screen.active { display: flex; }
+
+  /* ── HOME SCREEN ── */
+  #home {
+    justify-content: center;
+    background: linear-gradient(160deg, #e8f4ff 0%, #f5f0ff 100%);
+    gap: 28px;
+  }
+  .home-title {
+    font-size: clamp(2.4rem, 8vw, 3.6rem);
+    font-weight: 900;
+    color: var(--primary);
+    text-align: center;
+    line-height: 1.1;
+    letter-spacing: -1px;
+  }
+  .home-subtitle {
+    font-size: clamp(1rem, 3.5vw, 1.3rem);
+    color: var(--text-soft);
+    text-align: center;
+    font-weight: 700;
+  }
+  .mode-cards { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 480px; }
+  .mode-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 22px 28px;
+    display: flex; align-items: center; gap: 20px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    border: 3px solid transparent;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mode-card:active { transform: scale(0.97); }
+  .mode-card.letter { border-color: #5b9bd5; }
+  .mode-card.number { border-color: #f7a94b; }
+  .mode-card.sayit  { border-color: #7bc67e; }
+  .mode-icon { font-size: 2.6rem; width: 60px; text-align: center; flex-shrink: 0; }
+  .mode-label { font-size: clamp(1.2rem, 4.5vw, 1.5rem); font-weight: 800; }
+  .mode-desc  { font-size: clamp(0.8rem, 2.5vw, 0.95rem); color: var(--text-soft); font-weight: 700; margin-top: 2px; }
+  .settings-btn {
+    margin-top: 8px;
+    background: none; border: 2.5px solid var(--primary);
+    color: var(--primary); font-family: inherit; font-weight: 800;
+    font-size: 1rem; padding: 10px 28px; border-radius: 50px;
+    cursor: pointer; transition: background 0.15s, color 0.15s;
+  }
+  .settings-btn:active { background: var(--primary); color: #fff; }
+
+  /* ── STARS BAR ── */
+  .stars-bar {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--yellow-light); border-radius: 50px;
+    padding: 8px 20px; font-size: 1.1rem; font-weight: 800;
+    color: #b8860b;
+  }
+  .star-icon { font-size: 1.4rem; }
+
+  /* ── GAME SCREEN ── */
+  #game { justify-content: flex-start; gap: 0; padding: 12px; }
+  .game-header {
+    width: 100%; max-width: 600px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 4px 12px;
+    flex-shrink: 0;
+  }
+  .back-btn {
+    background: var(--card); border: none; border-radius: 50%;
+    width: 50px; height: 50px; font-size: 1.4rem;
+    cursor: pointer; box-shadow: var(--shadow);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .progress-wrap { flex: 1; margin: 0 14px; }
+  .progress-dots { display: flex; gap: 8px; justify-content: center; }
+  .progress-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: #dce8f5; transition: background 0.3s;
+    flex-shrink: 0;
+  }
+  .progress-dot.done { background: var(--green); }
+  .progress-dot.current { background: var(--primary); }
+
+  .sound-btn {
+    background: var(--card); border: none; border-radius: 50%;
+    width: 50px; height: 50px; font-size: 1.4rem;
+    cursor: pointer; box-shadow: var(--shadow);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* Timer bar */
+  .timer-bar-wrap {
+    width: 100%; max-width: 600px;
+    height: 10px; background: #dce8f5; border-radius: 10px;
+    margin-bottom: 10px; overflow: hidden; flex-shrink: 0;
+  }
+  .timer-bar-fill {
+    height: 100%; background: linear-gradient(90deg, #5b9bd5, #9ec8f7);
+    border-radius: 10px;
+    transition: width 0.5s linear;
+  }
+
+  /* Main letter/number display */
+  .question-area {
+    width: 100%; max-width: 600px;
+    flex: 0 0 auto;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 6px; padding: 6px 0 10px;
+  }
+  .question-label {
+    font-size: clamp(0.85rem, 2.8vw, 1rem);
+    color: var(--text-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  }
+  .big-display {
+    background: var(--card);
+    border-radius: 28px;
+    box-shadow: var(--shadow);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: transform 0.12s;
+    border: 4px solid var(--primary-light);
+    user-select: none;
+  }
+  .big-display:active { transform: scale(0.96); }
+  .big-letter {
+    font-size: clamp(5rem, 22vw, 9rem);
+    font-weight: 900; color: var(--primary); line-height: 1;
+    padding: 16px 32px;
+  }
+  .big-number {
+    font-size: clamp(5rem, 22vw, 9rem);
+    font-weight: 900; color: #f7a94b; line-height: 1;
+    padding: 16px 32px;
+  }
+  .big-picture {
+    font-size: clamp(4rem, 18vw, 7rem);
+    padding: 16px 28px; line-height: 1;
+  }
+  .tap-hint {
+    font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+    color: var(--text-soft); font-weight: 700;
+  }
+
+  /* Choices grid */
+  .choices-area {
+    width: 100%; max-width: 600px;
+    flex: 1;
+    display: grid;
+    gap: 12px;
+    padding: 4px 0 8px;
+    align-content: start;
+  }
+  .choices-area.cols-2 { grid-template-columns: 1fr 1fr; }
+  .choices-area.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .choices-area.cols-4 { grid-template-columns: 1fr 1fr; }
+
+  .choice-btn {
+    background: var(--card);
+    border: 4px solid transparent;
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 6px;
+    padding: 12px 6px;
+    transition: transform 0.12s, border-color 0.15s, box-shadow 0.15s;
+    min-height: 110px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .choice-btn:active:not(.disabled) { transform: scale(0.94); }
+  .choice-btn.correct { border-color: var(--green); background: var(--green-light); box-shadow: 0 0 0 4px rgba(92,184,92,0.2); }
+  .choice-btn.wrong   { border-color: var(--red); background: #fff0f0; }
+  .choice-btn.disabled { pointer-events: none; }
+  .choice-emoji { font-size: clamp(2.2rem, 9vw, 3.5rem); line-height: 1; }
+  .choice-count { font-size: clamp(1.6rem, 7vw, 2.8rem); font-weight: 900; color: var(--primary); line-height: 1; }
+  .choice-label { font-size: clamp(0.75rem, 2.8vw, 1rem); font-weight: 800; color: var(--text); }
+
+  /* Say It mode */
+  .sayit-area {
+    width: 100%; max-width: 600px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 12px; padding: 8px 0;
+    flex: 1;
+  }
+  .sayit-word {
+    font-size: clamp(2.2rem, 9vw, 3.6rem);
+    font-weight: 900; color: var(--primary); letter-spacing: 1px;
+  }
+  .sayit-prompt {
+    font-size: clamp(1rem, 3.5vw, 1.3rem);
+    font-weight: 700; color: var(--text-soft);
+    text-align: center; min-height: 1.8em;
+  }
+  .mic-btn {
+    width: clamp(90px,22vw,120px); height: clamp(90px,22vw,120px);
+    border-radius: 50%;
+    background: var(--primary); color: #fff;
+    border: none; font-size: clamp(2.4rem,9vw,3.6rem);
+    cursor: pointer; box-shadow: var(--shadow-hover);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.12s, background 0.2s;
+    flex-shrink: 0;
+  }
+  .mic-btn:active { transform: scale(0.93); }
+  .mic-btn.listening {
+    background: #e05c5c;
+    animation: mic-pulse 1s ease-in-out infinite;
+  }
+  .mic-btn.success { background: var(--green); }
+  .mic-btn.disabled-mic { pointer-events: none; opacity: 0.45; }
+  .mic-btn.fail { background: #f0a500; animation: none; }
+  @keyframes mic-pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(224,92,92,0.5); }
+    50%      { box-shadow: 0 0 0 18px rgba(224,92,92,0); }
+  }
+  .heard-text {
+    font-size: clamp(0.9rem, 3vw, 1.1rem);
+    font-weight: 700; color: var(--text-soft);
+    text-align: center; min-height: 1.5em;
+    font-style: italic;
+  }
+  .skip-btn {
+    background: none; border: 2.5px solid #cdd5de;
+    color: var(--text-soft); font-family: inherit; font-weight: 800;
+    font-size: clamp(0.85rem, 2.8vw, 1rem); padding: 10px 24px;
+    border-radius: 50px; cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .skip-btn:active { border-color: var(--primary); color: var(--primary); }
+  .try-btn {
+    background: var(--primary); color: #fff;
+    border: none; border-radius: 50px;
+    font-family: inherit; font-size: clamp(1.1rem, 4vw, 1.4rem);
+    font-weight: 800; padding: 16px 40px;
+    cursor: pointer; box-shadow: var(--shadow-hover);
+    transition: transform 0.12s, background 0.15s;
+  }
+  .try-btn:active { transform: scale(0.95); background: #4a89c4; }
+
+  /* Praise overlay */
+  #praise {
+    position: fixed; inset: 0;
+    background: rgba(255,255,255,0.92);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; z-index: 100;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  #praise.show { opacity: 1; pointer-events: auto; }
+  .praise-emoji { font-size: clamp(4rem, 18vw, 8rem); animation: pop 0.4s cubic-bezier(.36,2,.6,1); }
+  .praise-text  { font-size: clamp(1.6rem, 7vw, 2.8rem); font-weight: 900; color: var(--green); text-align: center; padding: 0 20px; }
+  .praise-sub   { font-size: clamp(1rem, 3.5vw, 1.4rem); font-weight: 700; color: var(--text-soft); text-align: center; padding: 0 20px; }
+  .stars-earned { font-size: clamp(1.8rem, 7vw, 3rem); }
+  @keyframes pop { 0%{transform:scale(0.3)} 60%{transform:scale(1.15)} 100%{transform:scale(1)} }
+
+  /* Round complete */
+  #round-end {
+    position: fixed; inset: 0;
+    background: linear-gradient(160deg, #e8f4ff 0%, #f5f0ff 100%);
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    gap: 20px; z-index: 200; padding: 30px;
+  }
+  #round-end.show { display: flex; }
+  .round-end-emoji { font-size: 5rem; }
+  .round-end-title { font-size: clamp(2rem, 8vw, 3rem); font-weight: 900; color: var(--primary); text-align: center; }
+  .round-end-stars { font-size: clamp(2rem, 8vw, 3rem); }
+  .round-end-sub { font-size: clamp(1rem, 3.5vw, 1.3rem); color: var(--text-soft); font-weight: 700; text-align: center; }
+  .round-end-btns { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 360px; margin-top: 8px; }
+  .re-btn {
+    border: none; border-radius: 50px; font-family: inherit;
+    font-size: clamp(1.1rem, 4vw, 1.4rem); font-weight: 800;
+    padding: 18px; cursor: pointer;
+    transition: transform 0.12s, opacity 0.15s;
+  }
+  .re-btn:active { transform: scale(0.96); opacity: 0.9; }
+  .re-btn.primary { background: var(--primary); color: #fff; box-shadow: var(--shadow-hover); }
+  .re-btn.secondary { background: var(--card); color: var(--text); box-shadow: var(--shadow); }
+
+  /* ── SETTINGS SCREEN ── */
+  #settings { justify-content: flex-start; gap: 0; }
+  .settings-header {
+    width: 100%; max-width: 560px;
+    display: flex; align-items: center; gap: 14px;
+    padding-bottom: 18px;
+  }
+  .settings-title { font-size: clamp(1.5rem, 5.5vw, 2rem); font-weight: 900; }
+  .settings-body { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 14px; }
+  .setting-group {
+    background: var(--card); border-radius: var(--radius); padding: 18px 22px;
+    box-shadow: var(--shadow);
+  }
+  .setting-group-title { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-soft); margin-bottom: 12px; }
+  .setting-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .setting-row:last-child { margin-bottom: 0; }
+  .setting-label { font-size: clamp(0.95rem, 3vw, 1.1rem); font-weight: 700; }
+
+  /* Toggle */
+  .toggle { position: relative; width: 52px; height: 28px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; inset: 0;
+    background: #cdd5de; border-radius: 28px; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle-slider::before {
+    content: ''; position: absolute;
+    width: 22px; height: 22px; left: 3px; bottom: 3px;
+    background: #fff; border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  }
+  .toggle input:checked + .toggle-slider { background: var(--primary); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(24px); }
+
+  /* Chip selector */
+  .chip-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    background: #eef3fa; border: 2.5px solid transparent;
+    border-radius: 50px; padding: 7px 18px;
+    font-family: inherit; font-size: clamp(0.85rem, 2.8vw, 0.95rem);
+    font-weight: 800; cursor: pointer; color: var(--text);
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .chip.selected { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+
+  /* Letter set checkboxes */
+  .letter-sets { display: flex; gap: 8px; flex-wrap: wrap; }
+  .set-chip {
+    background: #eef3fa; border: 2.5px solid transparent;
+    border-radius: 10px; padding: 6px 14px;
+    font-family: inherit; font-size: 0.85rem; font-weight: 800;
+    cursor: pointer; color: var(--text);
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .set-chip.selected { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+
+  /* ── UTILITIES ── */
+  .hidden { display: none !important; }
+  .speak-pulse { animation: pulse 0.6s ease-in-out; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.07)} }
+
+  /* Number dots layout */
+  .dots-wrap { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; align-items: center; max-width: 90px; }
+  .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
+
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+  <div class="stars-bar"><span class="star-icon">⭐</span><span id="total-stars">0</span> stars</div>
+  <div class="home-title">🌟 Learn &amp; Play</div>
+  <div class="home-subtitle">Tap a game to start!</div>
+  <div class="mode-cards">
+    <div class="mode-card letter" onclick="startMode('letter')">
+      <div class="mode-icon">🔤</div>
+      <div>
+        <div class="mode-label">Letter Match</div>
+        <div class="mode-desc">Find the right picture for each letter</div>
+      </div>
+    </div>
+    <div class="mode-card number" onclick="startMode('number')">
+      <div class="mode-icon">🔢</div>
+      <div>
+        <div class="mode-label">Number Match</div>
+        <div class="mode-desc">Count and find the right group</div>
+      </div>
+    </div>
+    <div class="mode-card sayit" onclick="startMode('sayit')">
+      <div class="mode-icon">🗣️</div>
+      <div>
+        <div class="mode-label">Say It!</div>
+        <div class="mode-desc">Listen and try to say the word</div>
+      </div>
+    </div>
+  </div>
+  <button class="settings-btn" onclick="showScreen('settings')">⚙️ Settings</button>
+</div>
+
+<!-- GAME -->
+<div id="game" class="screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()" aria-label="Back">🏠</button>
+    <div class="progress-wrap">
+      <div class="progress-dots" id="progress-dots"></div>
+    </div>
+    <button class="sound-btn" id="sound-btn" onclick="toggleSound()" aria-label="Sound">🔊</button>
+  </div>
+
+  <div class="timer-bar-wrap hidden" id="timer-bar-wrap">
+    <div class="timer-bar-fill" id="timer-bar-fill" style="width:100%"></div>
+  </div>
+
+  <!-- Letter/Number question -->
+  <div class="question-area" id="match-area">
+    <div class="question-label" id="question-label">Tap the letter to hear it</div>
+    <div class="big-display" id="big-display" onclick="speakCurrent()">
+      <span id="big-content" class="big-letter">A</span>
+    </div>
+    <div class="tap-hint" id="tap-hint">👆 Tap to hear it again</div>
+  </div>
+
+  <!-- Choices -->
+  <div class="choices-area cols-2" id="choices-area"></div>
+
+  <!-- Say It area -->
+  <div class="sayit-area hidden" id="sayit-area">
+    <div class="big-display" onclick="speakCurrent()" style="cursor:pointer;">
+      <span id="sayit-pic" class="big-picture">🐶</span>
+    </div>
+    <div class="sayit-word" id="sayit-word">DOG</div>
+    <div class="sayit-prompt" id="sayit-prompt">👂 Listen…</div>
+    <button class="mic-btn disabled-mic" id="mic-btn" onclick="onMicTap()" aria-label="Tap to speak">🎤</button>
+    <div class="heard-text" id="heard-text"></div>
+    <button class="skip-btn" id="parent-btn" onclick="onParentOverride()" style="opacity:0;pointer-events:none;">👤 Parent: he said it ✔️</button>
+  </div>
+  </div>
+</div>
+
+<!-- PRAISE OVERLAY -->
+<div id="praise">
+  <div class="praise-emoji" id="praise-emoji">🎉</div>
+  <div class="praise-text" id="praise-text">Amazing!</div>
+  <div class="praise-sub" id="praise-sub"></div>
+  <div class="stars-earned" id="stars-earned">⭐</div>
+</div>
+
+<!-- ROUND END -->
+<div id="round-end">
+  <div class="round-end-emoji">🏆</div>
+  <div class="round-end-title" id="re-title">Great job!</div>
+  <div class="round-end-stars" id="re-stars">⭐⭐⭐</div>
+  <div class="round-end-sub" id="re-sub">You earned 3 stars!</div>
+  <div class="round-end-btns">
+    <button class="re-btn primary" onclick="restartRound()">▶️ Play Again</button>
+    <button class="re-btn secondary" onclick="goHome()">🏠 Home</button>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" class="screen">
+  <div class="settings-header">
+    <button class="back-btn" onclick="showScreen('home')" aria-label="Back">🏠</button>
+    <div class="settings-title">⚙️ Settings</div>
+  </div>
+  <div class="settings-body">
+
+    <div class="setting-group">
+      <div class="setting-group-title">General</div>
+      <div class="setting-row">
+        <div class="setting-label">🔊 Sound</div>
+        <label class="toggle"><input type="checkbox" id="s-sound" checked onchange="saveSetting()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">⏱️ Timer</div>
+        <label class="toggle"><input type="checkbox" id="s-timer" onchange="saveSetting()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">💬 Repeat prompt after correct</div>
+        <label class="toggle"><input type="checkbox" id="s-prompt" checked onchange="saveSetting()"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-group-title">Questions per Round</div>
+      <div class="chip-group" id="s-qcount">
+        <button class="chip" data-val="3" onclick="selectChip('s-qcount',3)">3</button>
+        <button class="chip selected" data-val="5" onclick="selectChip('s-qcount',5)">5</button>
+        <button class="chip" data-val="10" onclick="selectChip('s-qcount',10)">10</button>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-group-title">Number of Answer Choices</div>
+      <div class="chip-group" id="s-choices">
+        <button class="chip selected" data-val="2" onclick="selectChip('s-choices',2)">2</button>
+        <button class="chip" data-val="3" onclick="selectChip('s-choices',3)">3</button>
+        <button class="chip" data-val="4" onclick="selectChip('s-choices',4)">4</button>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-group-title">Letter Sets</div>
+      <div class="letter-sets" id="s-lettersets">
+        <button class="set-chip selected" data-val="1" onclick="toggleLetterSet(1)">A–E</button>
+        <button class="set-chip" data-val="2" onclick="toggleLetterSet(2)">F–J</button>
+        <button class="set-chip" data-val="3" onclick="toggleLetterSet(3)">K–O</button>
+        <button class="set-chip" data-val="4" onclick="toggleLetterSet(4)">P–T</button>
+        <button class="set-chip" data-val="5" onclick="toggleLetterSet(5)">U–Z</button>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-group-title">Number Range</div>
+      <div class="chip-group" id="s-numrange">
+        <button class="chip selected" data-val="5" onclick="selectChip('s-numrange',5)">1–5</button>
+        <button class="chip" data-val="10" onclick="selectChip('s-numrange',10)">1–10</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+const LETTER_DATA = {
+  A:{word:'Apple', emoji:'🍎'},
+  B:{word:'Ball',  emoji:'⚽'},
+  C:{word:'Cat',   emoji:'🐱'},
+  D:{word:'Dog',   emoji:'🐶'},
+  E:{word:'Egg',   emoji:'🥚'},
+  F:{word:'Fish',  emoji:'🐟'},
+  G:{word:'Grapes',emoji:'🍇'},
+  H:{word:'Hat',   emoji:'🎩'},
+  I:{word:'Ice cream',emoji:'🍦'},
+  J:{word:'Juice', emoji:'🧃'},
+  K:{word:'Kite',  emoji:'🪁'},
+  L:{word:'Lion',  emoji:'🦁'},
+  M:{word:'Moon',  emoji:'🌙'},
+  N:{word:'Nest',  emoji:'🪺'},
+  O:{word:'Orange',emoji:'🍊'},
+  P:{word:'Pig',   emoji:'🐷'},
+  Q:{word:'Queen', emoji:'👑'},
+  R:{word:'Rainbow',emoji:'🌈'},
+  S:{word:'Sun',   emoji:'☀️'},
+  T:{word:'Train', emoji:'🚂'},
+  U:{word:'Umbrella',emoji:'☂️'},
+  V:{word:'Van',   emoji:'🚐'},
+  W:{word:'Water', emoji:'💧'},
+  X:{word:'X-ray', emoji:'🦴'},
+  Y:{word:'Yo-yo', emoji:'🪀'},
+  Z:{word:'Zebra', emoji:'🦓'},
+};
+const LETTER_SETS = {
+  1:['A','B','C','D','E'],
+  2:['F','G','H','I','J'],
+  3:['K','L','M','N','O'],
+  4:['P','Q','R','S','T'],
+  5:['U','V','W','X','Y','Z'],
+};
+
+const NUMBER_DATA = {
+  1:{word:'One',  emoji:'🌟', distractors:['🌟🌟','🌟🌟🌟']},
+  2:{word:'Two',  emoji:'🌟🌟', distractors:['🌟','🌟🌟🌟']},
+  3:{word:'Three',emoji:'🌟🌟🌟', distractors:['🌟🌟','🌟🌟🌟🌟']},
+  4:{word:'Four', emoji:'🌟🌟🌟🌟', distractors:['🌟🌟🌟','🌟🌟🌟🌟🌟']},
+  5:{word:'Five', emoji:'🌟🌟🌟🌟🌟', distractors:['🌟🌟🌟🌟','🌟🌟🌟🌟🌟🌟']},
+  6:{word:'Six',  emoji:'🌟🌟🌟🌟🌟🌟', distractors:['🌟🌟🌟🌟🌟','🌟🌟🌟🌟🌟🌟🌟']},
+  7:{word:'Seven',emoji:'🌟🌟🌟🌟🌟🌟🌟', distractors:['🌟🌟🌟🌟🌟🌟','🌟🌟🌟🌟🌟🌟🌟🌟']},
+  8:{word:'Eight',emoji:'🌟🌟🌟🌟🌟🌟🌟🌟', distractors:['🌟🌟🌟🌟🌟🌟🌟','🌟🌟🌟🌟🌟🌟🌟🌟🌟']},
+  9:{word:'Nine', emoji:'🌟🌟🌟🌟🌟🌟🌟🌟🌟', distractors:['🌟🌟🌟🌟🌟🌟🌟🌟','🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟']},
+ 10:{word:'Ten',  emoji:'🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟', distractors:['🌟🌟🌟🌟🌟🌟🌟🌟🌟','🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟']},
+};
+
+const SAYIT_WORDS = [
+  {word:'Dog',   emoji:'🐶'},
+  {word:'Ball',  emoji:'⚽'},
+  {word:'Car',   emoji:'🚗'},
+  {word:'Apple', emoji:'🍎'},
+  {word:'Cat',   emoji:'🐱'},
+  {word:'Bus',   emoji:'🚌'},
+  {word:'Banana',emoji:'🍌'},
+  {word:'Star',  emoji:'⭐'},
+  {word:'Sun',   emoji:'☀️'},
+  {word:'Fish',  emoji:'🐟'},
+  {word:'Bird',  emoji:'🐦'},
+  {word:'Moon',  emoji:'🌙'},
+];
+
+const PRAISE_OPTIONS = [
+  {emoji:'🎉', text:'Amazing!'},
+  {emoji:'⭐', text:'Super Star!'},
+  {emoji:'🎊', text:'Well done!'},
+  {emoji:'🌈', text:'Brilliant!'},
+  {emoji:'🏆', text:'You got it!'},
+  {emoji:'💛', text:'Wonderful!'},
+];
+
+// ─────────────────────────────────────────────
+// SETTINGS STATE
+// ─────────────────────────────────────────────
+let cfg = {
+  sound: true,
+  timer: false,
+  prompt: true,
+  qcount: 5,
+  choices: 2,
+  letterSets: [1],
+  numRange: 5,
+};
+
+function saveSetting() {
+  cfg.sound  = document.getElementById('s-sound').checked;
+  cfg.timer  = document.getElementById('s-timer').checked;
+  cfg.prompt = document.getElementById('s-prompt').checked;
+}
+function selectChip(groupId, val) {
+  document.querySelectorAll(`#${groupId} .chip`).forEach(c=>c.classList.remove('selected'));
+  document.querySelector(`#${groupId} [data-val="${val}"]`).classList.add('selected');
+  if(groupId==='s-qcount')   cfg.qcount  = val;
+  if(groupId==='s-choices')  cfg.choices = val;
+  if(groupId==='s-numrange') cfg.numRange= val;
+}
+function toggleLetterSet(val) {
+  const el = document.querySelector(`#s-lettersets [data-val="${val}"]`);
+  const idx = cfg.letterSets.indexOf(val);
+  if(idx>=0 && cfg.letterSets.length>1) { cfg.letterSets.splice(idx,1); el.classList.remove('selected'); }
+  else if(idx<0) { cfg.letterSets.push(val); el.classList.add('selected'); }
+}
+
+// ─────────────────────────────────────────────
+// SCREEN NAV
+// ─────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goHome() {
+  clearTimer();
+  document.getElementById('round-end').classList.remove('show');
+  document.getElementById('praise').classList.remove('show');
+  showScreen('home');
+  document.getElementById('total-stars').textContent = totalStars;
+}
+
+// ─────────────────────────────────────────────
+// GAME STATE
+// ─────────────────────────────────────────────
+let currentMode = '';
+let questions = [];
+let qIndex = 0;
+let roundStars = 0;
+let totalStars = 0;
+let timerInterval = null;
+let timerLeft = 0;
+let answered = false;
+
+function startMode(mode) {
+  currentMode = mode;
+  roundStars = 0;
+  qIndex = 0;
+  questions = buildQuestions(mode);
+  showScreen('game');
+  updateSoundBtn();
+
+  const matchArea = document.getElementById('match-area');
+  const choicesArea = document.getElementById('choices-area');
+  const sayitArea = document.getElementById('sayit-area');
+
+  if(mode==='sayit') {
+    matchArea.classList.add('hidden');
+    choicesArea.classList.add('hidden');
+    sayitArea.classList.remove('hidden');
+  } else {
+    matchArea.classList.remove('hidden');
+    choicesArea.classList.remove('hidden');
+    sayitArea.classList.add('hidden');
+  }
+
+  renderProgress();
+  renderQuestion();
+}
+
+function buildQuestions(mode) {
+  let pool = [];
+  if(mode==='letter') {
+    cfg.letterSets.forEach(s=>{ pool.push(...LETTER_SETS[s]); });
+    shuffle(pool);
+    return pool.slice(0, cfg.qcount);
+  }
+  if(mode==='number') {
+    pool = Array.from({length:cfg.numRange},(_, i)=>i+1);
+    shuffle(pool);
+    return pool.slice(0, cfg.qcount);
+  }
+  if(mode==='sayit') {
+    pool = [...SAYIT_WORDS];
+    shuffle(pool);
+    return pool.slice(0, cfg.qcount);
+  }
+  return [];
+}
+
+function renderProgress() {
+  const dots = document.getElementById('progress-dots');
+  dots.innerHTML = '';
+  for(let i=0;i<questions.length;i++){
+    const d = document.createElement('div');
+    d.className = 'progress-dot' + (i<qIndex?' done': i===qIndex?' current':'');
+    dots.appendChild(d);
+  }
+}
+
+function renderQuestion() {
+  answered = false;
+  renderProgress();
+  const q = questions[qIndex];
+
+  if(currentMode==='letter') renderLetterQ(q);
+  if(currentMode==='number') renderNumberQ(q);
+  if(currentMode==='sayit')  renderSayItQ(q);
+
+  if(cfg.timer && currentMode!=='sayit') startTimer();
+  else clearTimer();
+}
+
+// ── LETTER MODE ──
+function renderLetterQ(letter) {
+  const bd = document.getElementById('big-content');
+  bd.className = 'big-letter';
+  bd.textContent = letter;
+  document.getElementById('question-label').textContent = 'Tap the letter to hear it';
+
+  // Build choices: correct + wrong
+  const allLetters = Object.keys(LETTER_DATA).filter(l=>l!==letter);
+  shuffle(allLetters);
+  const wrong = allLetters.slice(0, cfg.choices-1);
+  const all = shuffle([letter, ...wrong]);
+
+  const ca = document.getElementById('choices-area');
+  ca.innerHTML = '';
+  ca.className = 'choices-area ' + (cfg.choices<=2?'cols-2': cfg.choices===3?'cols-3':'cols-4');
+
+  all.forEach(l => {
+    const d = LETTER_DATA[l];
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="choice-emoji">${d.emoji}</span><span class="choice-label">${d.word}</span>`;
+    btn.onclick = () => onLetterChoice(l, letter, btn);
+    ca.appendChild(btn);
+  });
+
+  setTimeout(()=>speakLetter(letter), 600);
+}
+
+function onLetterChoice(chosen, correct, btn) {
+  if(answered) return;
+  answered = true;
+  clearTimer();
+  const allBtns = document.querySelectorAll('.choice-btn');
+  allBtns.forEach(b=>b.classList.add('disabled'));
+
+  if(chosen===correct) {
+    btn.classList.add('correct');
+    const d = LETTER_DATA[correct];
+    const phrase = `${correct} is for ${d.word}`;
+    const sub = cfg.prompt ? `Can you say "${d.word}"?` : '';
+    playSuccess();
+    setTimeout(()=>speak(phrase), 200);
+    setTimeout(()=>showPraise(d.emoji, phrase, sub), 300);
+  } else {
+    btn.classList.add('wrong');
+    // show correct
+    document.querySelectorAll('.choice-btn').forEach((b,i)=>{
+      const label = b.querySelector('.choice-label').textContent;
+      if(label===LETTER_DATA[correct].word) b.classList.add('correct');
+    });
+    playWrong();
+    setTimeout(()=>{ nextQuestion(); }, 1800);
+  }
+}
+
+function speakLetter(letter) {
+  if(!cfg.sound) return;
+  if(!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  // Speak the letter as lowercase to avoid TTS saying "capital A"
+  const u = new SpeechSynthesisUtterance(letter.toLowerCase());
+  u.rate = 0.78;
+  u.pitch = 1.05;
+  u.lang = 'en-US';
+  const voices = window.speechSynthesis.getVoices();
+  const pref = voices.find(v=>v.name.includes('Samantha')||v.name.includes('Karen')||v.name.includes('Moira'))||
+               voices.find(v=>v.lang==='en-US')||voices[0];
+  if(pref) u.voice = pref;
+  window.speechSynthesis.speak(u);
+}
+
+// ── NUMBER MODE ──
+function renderNumberQ(num) {
+  const bd = document.getElementById('big-content');
+  bd.className = 'big-number';
+  bd.textContent = num;
+  document.getElementById('question-label').textContent = 'Tap the number to hear it';
+
+  const allNums = Object.keys(NUMBER_DATA).map(Number).filter(n=>n!==num && n<=cfg.numRange);
+  shuffle(allNums);
+  const wrong = allNums.slice(0, cfg.choices-1);
+  const all = shuffle([num, ...wrong]);
+
+  const ca = document.getElementById('choices-area');
+  ca.innerHTML = '';
+  ca.className = 'choices-area ' + (cfg.choices<=2?'cols-2': cfg.choices===3?'cols-3':'cols-4');
+
+  all.forEach(n => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    // render as dots
+    const dotsHtml = renderDots(n);
+    btn.innerHTML = `<div class="dots-wrap">${dotsHtml}</div><span class="choice-count">${n}</span>`;
+    btn.onclick = () => onNumberChoice(n, num, btn);
+    ca.appendChild(btn);
+  });
+
+  setTimeout(()=>speak(NUMBER_DATA[num].word), 600);
+}
+
+function renderDots(n) {
+  let html = '';
+  for(let i=0;i<n;i++) html += `<div class="dot"></div>`;
+  return html;
+}
+
+function onNumberChoice(chosen, correct, btn) {
+  if(answered) return;
+  answered = true;
+  clearTimer();
+  document.querySelectorAll('.choice-btn').forEach(b=>b.classList.add('disabled'));
+
+  if(chosen===correct) {
+    btn.classList.add('correct');
+    const phrase = `${NUMBER_DATA[correct].word}!`;
+    playSuccess();
+    setTimeout(()=>speak(NUMBER_DATA[correct].word), 200);
+    setTimeout(()=>showPraise('🔢', phrase, ''), 300);
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.choice-btn').forEach(b=>{
+      const label = b.querySelector('.choice-count');
+      if(label && parseInt(label.textContent)===correct) b.classList.add('correct');
+    });
+    playWrong();
+    setTimeout(()=>{ nextQuestion(); }, 1800);
+  }
+}
+
+// ── SAY IT MODE ──
+let recog = null;
+let micReady = false;
+let sayItAttempts = 0;
+
+function initRecog() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) { micReady = false; return; }
+  micReady = true;
+}
+
+function buildRecog() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return null;
+  const r = new SR();
+  r.lang = 'en-AU'; // Australian English for iPad locale
+  r.continuous = false;
+  r.interimResults = true;
+  r.maxAlternatives = 6;
+  return r;
+}
+
+function renderSayItQ(item) {
+  sayItAttempts = 0;
+  document.getElementById('sayit-pic').textContent = item.emoji;
+  document.getElementById('sayit-word').textContent = item.word.toUpperCase();
+  document.getElementById('sayit-prompt').textContent = '👂 Listen…';
+  document.getElementById('heard-text').textContent = '';
+
+  const micBtn     = document.getElementById('mic-btn');
+  const parentBtn  = document.getElementById('parent-btn');
+
+  micBtn.classList.add('disabled-mic');
+  micBtn.classList.remove('listening', 'success', 'fail');
+  micBtn.textContent = '🎤';
+  parentBtn.style.opacity = '0';
+  parentBtn.style.pointerEvents = 'none';
+
+  setTimeout(() => {
+    speak(item.word);
+    setTimeout(() => {
+      if (micReady) {
+        document.getElementById('sayit-prompt').textContent = '🎤 Tap the mic and say the word!';
+      } else {
+        document.getElementById('sayit-prompt').textContent = '🚫 Microphone not available on this device.';
+        parentBtn.style.opacity = '1';
+        parentBtn.style.pointerEvents = 'auto';
+      }
+      micBtn.classList.remove('disabled-mic');
+    }, 1600);
+  }, 700);
+}
+
+function onMicTap() {
+  if (!micReady) return;
+  const item = questions[qIndex];
+  if (!item || answered) return;
+
+  const micBtn = document.getElementById('mic-btn');
+
+  // If already listening, stop
+  if (micBtn.classList.contains('listening')) {
+    if (recog) { try { recog.stop(); } catch(e) {} }
+    return;
+  }
+
+  recog = buildRecog();
+  if (!recog) { micReady = false; return; }
+
+  micBtn.classList.add('listening');
+  micBtn.classList.remove('fail');
+  micBtn.textContent = '🔴';
+  document.getElementById('sayit-prompt').textContent = '🟡 Listening… say the word!';
+  document.getElementById('heard-text').textContent = '';
+
+  let finalResult = '';
+  let resultReceived = false;
+
+  recog.onresult = (e) => {
+    let interimText = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript.trim();
+      if (e.results[i].isFinal) {
+        // Collect all alternatives from all results
+        for (let j = 0; j < e.results[i].length; j++) {
+          const alt = e.results[i][j].transcript.trim().toLowerCase();
+          if (alt.length > finalResult.length) finalResult = alt;
+        }
+        resultReceived = true;
+      } else {
+        interimText = t;
+      }
+    }
+    if (interimText) {
+      document.getElementById('heard-text').textContent = '“' + interimText + '…”';
+    }
+  };
+
+  recog.onend = () => {
+    micBtn.classList.remove('listening');
+    micBtn.textContent = '🎤';
+
+    if (!resultReceived || finalResult.length === 0) {
+      // Nothing was heard at all
+      sayItAttempts++;
+      document.getElementById('heard-text').textContent = '';
+      document.getElementById('sayit-prompt').textContent = '🤔 Nothing heard — tap the mic and try again!';
+      micBtn.classList.remove('disabled-mic');
+      if (sayItAttempts >= 3) showParentOverride();
+      return;
+    }
+
+    document.getElementById('heard-text').textContent = '“' + finalResult + '”';
+
+    const target  = item.word.toLowerCase();
+    const matched = wordMatch(finalResult, target);
+
+    if (matched) {
+      micBtn.classList.add('success');
+      micBtn.textContent = '✅';
+      document.getElementById('sayit-prompt').textContent = '🎉 You said it!';
+      playSuccess();
+      speak(item.word);
+      setTimeout(() => {
+        const sub = cfg.prompt ? `You said "${item.word}" — brilliant!` : '';
+        showPraise(item.emoji, item.word, sub);
+      }, 800);
+    } else {
+      // Heard something but wrong word
+      sayItAttempts++;
+      micBtn.classList.add('fail');
+      micBtn.textContent = '🎤';
+      const tryPhrases = [
+        `🙂 Good try! Can you say "${item.word}"?`,
+        `😊 Almost! Try saying "${item.word}" again!`,
+        `👍 Keep trying! Say "${item.word}"!`,
+      ];
+      document.getElementById('sayit-prompt').textContent =
+        tryPhrases[Math.min(sayItAttempts - 1, tryPhrases.length - 1)];
+      // Speak the word again as a gentle model
+      setTimeout(() => speak(item.word), 600);
+      setTimeout(() => {
+        micBtn.classList.remove('fail', 'disabled-mic');
+      }, 400);
+      if (sayItAttempts >= 3) showParentOverride();
+    }
+  };
+
+  recog.onerror = (e) => {
+    micBtn.classList.remove('listening');
+    micBtn.textContent = '🎤';
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      micReady = false;
+      document.getElementById('sayit-prompt').textContent = '🚫 Microphone blocked. Please allow mic access in Chrome settings.';
+      showParentOverride();
+    } else if (e.error === 'no-speech') {
+      sayItAttempts++;
+      document.getElementById('sayit-prompt').textContent = '🤔 Nothing heard — tap the mic and try again!';
+      if (sayItAttempts >= 3) showParentOverride();
+    } else {
+      document.getElementById('sayit-prompt').textContent = '🤔 Something went wrong — try again!';
+    }
+  };
+
+  try {
+    recog.start();
+  } catch(err) {
+    micBtn.classList.remove('listening');
+    micBtn.textContent = '🎤';
+    document.getElementById('sayit-prompt').textContent = '🤔 Mic error — tap to try again!';
+  }
+}
+
+function showParentOverride() {
+  const btn = document.getElementById('parent-btn');
+  btn.style.opacity = '1';
+  btn.style.pointerEvents = 'auto';
+}
+
+function onParentOverride() {
+  // Parent manually confirms the child said the word
+  if (answered) return;
+  answered = true;
+  if (recog) { try { recog.stop(); } catch(e) {} }
+  const item = questions[qIndex];
+  playSuccess();
+  const sub = cfg.prompt ? `Well done saying "${item.word}"!` : '';
+  setTimeout(() => showPraise(item.emoji, item.word, sub), 200);
+}
+
+function wordMatch(heard, target) {
+  if (!heard || !target) return false;
+  const h = heard.toLowerCase().trim();
+  const t = target.toLowerCase().trim();
+  if (h === t) return true;
+  if (h.includes(t)) return true;
+  if (t.includes(h) && h.length >= 2) return true;
+  // Check all space-separated tokens in heard
+  const tokens = h.split(/\s+/);
+  for (const tok of tokens) {
+    if (tok === t) return true;
+    if (levenshtein(tok, t) <= Math.max(1, Math.floor(t.length * 0.35))) return true;
+    if (soundexSimple(tok) === soundexSimple(t)) return true;
+  }
+  return false;
+}
+
+function soundexSimple(s) {
+  if (!s) return '';
+  const map = {b:1,f:1,p:1,v:1,c:2,g:2,j:2,k:2,q:2,s:2,x:2,z:2,d:3,t:3,l:4,m:5,n:5,r:6};
+  let code = s[0].toUpperCase();
+  let prev = map[s[0].toLowerCase()] || 0;
+  for (let i = 1; i < s.length && code.length < 4; i++) {
+    const v = map[s[i].toLowerCase()] || 0;
+    if (v && v !== prev) code += v;
+    prev = v;
+  }
+  return code.padEnd(4, '0');
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({length: m+1}, (_, i) =>
+    Array.from({length: n+1}, (_, j) => i === 0 ? j : j === 0 ? i : 0)
+  );
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+function onSayItTry() {} // disabled - mic only now
+
+
+function speakCurrent() {
+  const q = questions[qIndex];
+  if(!q) return;
+  if(currentMode==='letter') speakLetter(q);
+  if(currentMode==='number') speak(NUMBER_DATA[q].word);
+  if(currentMode==='sayit')  speak(q.word);
+  const bd = document.getElementById('big-display');
+  bd.classList.remove('speak-pulse');
+  void bd.offsetWidth;
+  bd.classList.add('speak-pulse');
+}
+
+// ─────────────────────────────────────────────
+// PRAISE & NEXT
+// ─────────────────────────────────────────────
+function showPraise(emoji, text, sub) {
+  const p = PRAISE_OPTIONS[Math.floor(Math.random()*PRAISE_OPTIONS.length)];
+  const overlay = document.getElementById('praise');
+  document.getElementById('praise-emoji').textContent = p.emoji;
+  document.getElementById('praise-text').textContent = p.text;
+  document.getElementById('praise-sub').textContent = sub||text;
+  document.getElementById('stars-earned').textContent = '⭐';
+  overlay.classList.add('show');
+  roundStars++;
+
+  setTimeout(()=>{
+    overlay.classList.remove('show');
+    nextQuestion();
+  }, 2000);
+}
+
+function nextQuestion() {
+  qIndex++;
+  if(qIndex >= questions.length) {
+    endRound();
+  } else {
+    renderQuestion();
+  }
+}
+
+function endRound() {
+  totalStars += roundStars;
+  document.getElementById('total-stars').textContent = totalStars;
+
+  const titles = ['Great job!','You did it!','Brilliant!','Amazing work!'];
+  document.getElementById('re-title').textContent = titles[Math.floor(Math.random()*titles.length)];
+  document.getElementById('re-stars').textContent = '⭐'.repeat(Math.min(roundStars,10));
+  document.getElementById('re-sub').textContent = `You earned ${roundStars} star${roundStars!==1?'s':''}!`;
+  document.getElementById('round-end').classList.add('show');
+  if(cfg.sound) speak(`You did it! ${roundStars} star${roundStars!==1?'s':''}`);
+}
+
+function restartRound() {
+  document.getElementById('round-end').classList.remove('show');
+  startMode(currentMode);
+}
+
+// ─────────────────────────────────────────────
+// TIMER
+// ─────────────────────────────────────────────
+const TIMER_SECONDS = 10;
+
+function startTimer() {
+  if(!cfg.timer) { document.getElementById('timer-bar-wrap').classList.add('hidden'); return; }
+  document.getElementById('timer-bar-wrap').classList.remove('hidden');
+  timerLeft = TIMER_SECONDS;
+  document.getElementById('timer-bar-fill').style.width = '100%';
+  clearInterval(timerInterval);
+  timerInterval = setInterval(()=>{
+    timerLeft -= 0.5;
+    const pct = Math.max(0, (timerLeft/TIMER_SECONDS)*100);
+    document.getElementById('timer-bar-fill').style.width = pct+'%';
+    if(timerLeft<=0) { clearInterval(timerInterval); if(!answered){ answered=true; setTimeout(nextQuestion,400); } }
+  }, 500);
+}
+function clearTimer() {
+  clearInterval(timerInterval);
+  document.getElementById('timer-bar-wrap').classList.add('hidden');
+}
+
+// ─────────────────────────────────────────────
+// SPEECH
+// ─────────────────────────────────────────────
+function speak(text) {
+  if(!cfg.sound) return;
+  if(!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.82;
+  u.pitch = 1.05;
+  u.lang = 'en-US';
+  // prefer a clear voice
+  const voices = window.speechSynthesis.getVoices();
+  const pref = voices.find(v=>v.name.includes('Samantha')||v.name.includes('Karen')||v.name.includes('Moira'))||
+               voices.find(v=>v.lang==='en-US')||voices[0];
+  if(pref) u.voice = pref;
+  window.speechSynthesis.speak(u);
+}
+
+// ─────────────────────────────────────────────
+// SOUNDS (Web Audio)
+// ─────────────────────────────────────────────
+function getAudioCtx() {
+  if(!window._actx) window._actx = new (window.AudioContext||window.webkitAudioContext)();
+  return window._actx;
+}
+function playSuccess() {
+  if(!cfg.sound) return;
+  try {
+    const ctx = getAudioCtx();
+    const notes = [523,659,784,1047];
+    notes.forEach((freq,i)=>{
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type='sine'; o.frequency.value=freq;
+      const t = ctx.currentTime + i*0.1;
+      g.gain.setValueAtTime(0.18,t);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+      o.start(t); o.stop(t+0.35);
+    });
+  } catch(e){}
+}
+function playWrong() {
+  if(!cfg.sound) return;
+  try {
+    const ctx = getAudioCtx();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type='sine'; o.frequency.setValueAtTime(300,ctx.currentTime);
+    o.frequency.linearRampToValueAtTime(220, ctx.currentTime+0.3);
+    g.gain.setValueAtTime(0.12,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);
+    o.start(); o.stop(ctx.currentTime+0.45);
+  } catch(e){}
+}
+
+// ─────────────────────────────────────────────
+// SOUND TOGGLE
+// ─────────────────────────────────────────────
+function toggleSound() {
+  cfg.sound = !cfg.sound;
+  document.getElementById('s-sound').checked = cfg.sound;
+  updateSoundBtn();
+}
+function updateSoundBtn() {
+  document.getElementById('sound-btn').textContent = cfg.sound ? '🔊' : '🔇';
+}
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+function shuffle(arr) {
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+// Load voices async (Safari/iOS needs this)
+window.speechSynthesis.onvoiceschanged = ()=>{ window.speechSynthesis.getVoices(); };
+
+// Init speech recognition
+initRecog();
+</script>
+</body>
+</html>
