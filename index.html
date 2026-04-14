@@ -1455,13 +1455,7 @@ function stopMenuMusic() {
   } catch (e) {}
 }
 
-document.addEventListener('click', () => {
-  const homeScreen = document.getElementById('home');
-  const onHome = homeScreen && homeScreen.classList.contains('active');
-  if (!menuMusicStarted && cfg.sound && cfg.music && onHome) {
-    playMenuMusic();
-  }
-}, { once: true });
+
 // ─────────────────────────────────────────────
 // SCREEN NAV
 // ─────────────────────────────────────────────
@@ -2868,6 +2862,52 @@ function renderJigsawPieceSvg(image, boardSize, row, col, pieceW, pieceH, tabSiz
 }
 
 
+
+function playJigsawDragSound(){
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(420, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(560, ctx.currentTime + 0.08);
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.04, ctx.currentTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.10);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.11);
+  } catch(e) {}
+}
+
+function playJigsawPlaceSound(){
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc1.type = 'sine';
+    osc2.type = 'sine';
+    osc1.frequency.setValueAtTime(660, ctx.currentTime);
+    osc2.frequency.setValueAtTime(880, ctx.currentTime + 0.02);
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.06, ctx.currentTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(ctx.destination);
+    osc1.start();
+    osc2.start(ctx.currentTime + 0.02);
+    osc1.stop(ctx.currentTime + 0.16);
+    osc2.stop(ctx.currentTime + 0.18);
+  } catch(e) {}
+}
+
 function resetJigsawState(){
   const board = document.getElementById('jigsaw-board');
   const area = document.getElementById('jigsaw-pieces-area');
@@ -3079,6 +3119,7 @@ function enableJigsawPieceDrag(piece){
   piece.addEventListener('pointerdown', (e) => {
     if (!currentJigsaw || piece.dataset.placed === '1') return;
     e.preventDefault();
+    playJigsawDragSound();
     currentDraggedPiece = piece;
     piece.classList.add('dragging');
     piece.setPointerCapture(e.pointerId);
@@ -3172,6 +3213,7 @@ function placeJigsawPiece(piece, row, col){
   piece.style.left = `${boardLeftInArea + col * currentJigsaw.pieceW - currentJigsaw.tabSize}px`;
   piece.style.top = `${boardTopInArea + row * currentJigsaw.pieceH - currentJigsaw.tabSize}px`;
   piece.classList.add('placed');
+  playJigsawPlaceSound();
   piece.dataset.placed = '1';
 
   if (!piece.dataset.counted) {
@@ -3217,6 +3259,28 @@ function shuffleCurrentJigsaw(){
 function restartCurrentJigsaw(){
   shuffleCurrentJigsaw();
 }
+
+
+window.addEventListener('load', () => {
+  try {
+    const audio = getMenuMusic && getMenuMusic();
+    if (audio && cfg && cfg.sound && cfg.music) {
+      audio.volume = 0.45;
+      const p = audio.play();
+      if (p && p.catch) {
+        p.catch(() => {
+          // fallback: try once on first interaction
+          document.addEventListener('click', () => {
+            try {
+              audio.play();
+            } catch(e){}
+          }, { once: true });
+        });
+      }
+      menuMusicStarted = true;
+    }
+  } catch(e){}
+});
 
 </script>
 </body>
