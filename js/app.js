@@ -1457,6 +1457,15 @@ function stopTimerAlarm(){
 
 
 
+
+function shuffleArray(arr){
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 const JIGSAW_DIFFICULTIES = [
   { pieces: 10, cols: 5, rows: 2 },
   { pieces: 20, cols: 5, rows: 4 },
@@ -1814,13 +1823,23 @@ function buildJigsawGame(theme, diff){
   area.style.width = `${usedTrayW}px`;
   area.style.minHeight = `${Math.max(denseTray ? 220 : 280, padding * 2 + rowsInTray * pieceBoxH + (rowsInTray - 1) * gap)}px`;
 
+  const trayPositions = [];
+  for (let i = 0; i < diff.pieces; i++) {
+    const tr = Math.floor(i / colsInTray);
+    const tc = i % colsInTray;
+    trayPositions.push({
+      x: padding + tc * (pieceBoxW + gap),
+      y: padding + tr * (pieceBoxH + gap)
+    });
+  }
+  shuffleArray(trayPositions);
+
   let idx = 0;
   for (let row = 0; row < diff.rows; row++) {
     for (let col = 0; col < diff.cols; col++) {
-      const tr = Math.floor(idx / colsInTray);
-      const tc = idx % colsInTray;
-      const x = padding + tc * (pieceBoxW + gap);
-      const y = padding + tr * (pieceBoxH + gap);
+      const pos = trayPositions[idx];
+      const x = pos.x;
+      const y = pos.y;
       const piece = document.createElement('div');
       const pieceId = `piece-${row}-${col}`;
       const tabs = tabMap[row][col];
@@ -1964,7 +1983,9 @@ function shuffleCurrentJigsaw(){
   if (!currentJigsaw) return;
   const theme = JIGSAW_THEMES.find(t => t.id === currentJigsaw.themeId) || JIGSAW_THEMES[0];
   const diff = JIGSAW_DIFFICULTIES.find(d => d.pieces === currentJigsaw.pieces) || JIGSAW_DIFFICULTIES[0];
-  buildJigsawGame(theme, diff);
+  resetJigsawState();
+  showScreen('jigsaw-play');
+  requestAnimationFrame(() => buildJigsawGame(theme, diff));
 }
 
 function restartCurrentJigsaw(){
